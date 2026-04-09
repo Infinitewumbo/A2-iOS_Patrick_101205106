@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ProductListView: View {
+    @Environment(\.managedObjectContext) private var viewContext
     @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \Product.productName, ascending: true)])
     private var products: FetchedResults<Product>
     
@@ -36,19 +37,34 @@ struct ProductListView: View {
                         .foregroundColor(.secondary)
                 }
             } else {
-                List(filteredProducts) { product in
-                    VStack(alignment: .leading) {
-                        Text(product.productName ?? "Unknown Product")
-                            .font(.headline)
-                        Text(product.productDescription ?? "No description available")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .lineLimit(1)
+                List {
+                    ForEach(filteredProducts) { product in
+                        VStack(alignment: .leading) {
+                            Text(product.productName ?? "Unknown Product")
+                                .font(.headline)
+                            Text(product.productDescription ?? "No description available")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .lineLimit(1)
+                        }
                     }
+                    .onDelete(perform: deleteProducts)
                 }
             }
         }
         .navigationTitle("All Products")
         .searchable(text: $searchText, prompt: "Search name or description")
+    }
+
+    private func deleteProducts(offsets: IndexSet) {
+        withAnimation {
+            offsets.map { filteredProducts[$0] }.forEach(viewContext.delete)
+            
+            do {
+                try viewContext.save()
+            } catch {
+                print("Error deleting: \(error)")
+            }
+        }
     }
 }
