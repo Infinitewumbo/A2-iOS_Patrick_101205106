@@ -13,7 +13,6 @@ struct ProductListView: View {
     
     @State private var searchText = ""
     
-    // Logic to filter products by Name OR Description
     var filteredProducts: [Product] {
         if searchText.isEmpty {
             return Array(products)
@@ -26,14 +25,27 @@ struct ProductListView: View {
     }
     
     var body: some View {
-        List(filteredProducts) { product in
-            VStack(alignment: .leading) {
-                Text(product.productName ?? "Unknown Product")
-                    .font(.headline)
-                Text(product.productDescription ?? "No description available")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
+        Group {
+            if filteredProducts.isEmpty && !searchText.isEmpty {
+                VStack(spacing: 20) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 50))
+                        .foregroundColor(.gray)
+                    Text("No products match '\(searchText)'")
+                        .font(.headline)
+                        .foregroundColor(.secondary)
+                }
+            } else {
+                List(filteredProducts) { product in
+                    VStack(alignment: .leading) {
+                        Text(product.productName ?? "Unknown Product")
+                            .font(.headline)
+                        Text(product.productDescription ?? "No description available")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
+                    }
+                }
             }
         }
         .navigationTitle("All Products")
