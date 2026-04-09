@@ -11,24 +11,37 @@ struct AddProductView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.dismiss) var dismiss
 
-    // State variables for each required attribute
     @State private var id = ""
     @State private var name = ""
     @State private var description = ""
     @State private var price = ""
     @State private var provider = ""
+    
+    var isFormInvalid: Bool {
+        name.trimmingCharacters(in: .whitespaces).isEmpty ||
+        id.trimmingCharacters(in: .whitespaces).isEmpty ||
+        Double(price) == nil
+    }
 
     var body: some View {
         NavigationView {
             Form {
                 Section(header: Text("Product Details")) {
-                    TextField("Product ID", text: $id)
+                    TextField("Product ID (Numbers only)", text: $id)
                         .keyboardType(.numberPad)
                     TextField("Product Name", text: $name)
                     TextField("Product Description", text: $description)
-                    TextField("Price", text: $price)
+                    TextField("Price (e.g. 19.99)", text: $price)
                         .keyboardType(.decimalPad)
                     TextField("Provider", text: $provider)
+                }
+                
+                if isFormInvalid && !name.isEmpty {
+                    Section {
+                        Text("Please enter a valid Name, ID, and Price.")
+                            .foregroundColor(.red)
+                            .font(.caption)
+                    }
                 }
             }
             .navigationTitle("Add New Product")
@@ -40,7 +53,7 @@ struct AddProductView: View {
                     Button("Save") {
                         saveProduct()
                     }
-                    .disabled(name.isEmpty || id.isEmpty)
+                    .disabled(isFormInvalid)
                 }
             }
         }
@@ -55,10 +68,10 @@ struct AddProductView: View {
         newProduct.productProvider = provider
 
         do {
-            try viewContext.save() // Save to Core Data
+            try viewContext.save()
             dismiss()
         } catch {
-            print("Error saving product: \(error)")
+            print("Error: \(error)")
         }
     }
 }
