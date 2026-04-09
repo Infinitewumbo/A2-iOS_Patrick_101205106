@@ -6,6 +6,7 @@
 // Patrick Millares 101205106
 
 import SwiftUI
+import CoreData
 
 struct ProductListView: View {
     @Environment(\.managedObjectContext) private var viewContext
