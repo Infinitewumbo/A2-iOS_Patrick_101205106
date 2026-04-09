@@ -10,12 +10,9 @@ import CoreData
 
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
-    
-    // Fetch all products sorted by ID
     @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \Product.productId, ascending: true)])
     private var products: FetchedResults<Product>
     
-    // Track which product is currently being viewed
     @State private var currentIndex: Int = 0
 
     var body: some View {
@@ -24,7 +21,6 @@ struct ContentView: View {
                 if !products.isEmpty {
                     let currentProduct = products[currentIndex]
                     
-                    // Product Details Card
                     VStack(alignment: .leading, spacing: 10) {
                         Text("Product ID: \(currentProduct.productId)")
                             .font(.headline)
@@ -42,7 +38,6 @@ struct ContentView: View {
                     .background(Color.gray.opacity(0.1))
                     .cornerRadius(10)
                     
-                    // Navigation Buttons (Requirement: "allow user to navigate through all products")
                     HStack {
                         Button(action: { if currentIndex > 0 { currentIndex -= 1 } }) {
                             Label("Previous", systemImage: "arrow.left")
@@ -50,9 +45,7 @@ struct ContentView: View {
                         .disabled(currentIndex == 0)
                         
                         Spacer()
-                        
                         Text("\(currentIndex + 1) of \(products.count)")
-                        
                         Spacer()
                         
                         Button(action: { if currentIndex < products.count - 1 { currentIndex += 1 } }) {
@@ -67,7 +60,13 @@ struct ContentView: View {
                 }
             }
             .navigationTitle("Product Details")
-            .padding()
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    NavigationLink(destination: ProductListView()) {
+                        Image(systemName: "list.bullet")
+                    }
+                }
+            }
         }
     }
 }
