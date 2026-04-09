@@ -27,7 +27,7 @@ struct ContentView: View {
                             Text("ID: \(currentProduct.productId)")
                                 .font(.caption.bold())
                                 .padding(6)
-                                .background(Color.blue.opacity(0.2))
+                                .background(Color.blue.opacity(0.3))
                                 .cornerRadius(5)
                             Spacer()
                             Text(currentProduct.productProvider ?? "Unknown")
