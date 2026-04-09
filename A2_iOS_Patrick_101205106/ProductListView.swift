@@ -3,7 +3,7 @@
 //  A2_iOS_Patrick_101205106
 //
 //  Created by Patrick Millares on 2026-04-09.
-//
+// Patrick Millares 101205106
 
 import SwiftUI
 
@@ -26,31 +26,21 @@ struct ProductListView: View {
     }
     
     var body: some View {
-        Group {
-            if filteredProducts.isEmpty && !searchText.isEmpty {
-                VStack(spacing: 20) {
-                    Image(systemName: "magnifyingglass")
-                        .font(.system(size: 50))
-                        .foregroundColor(.gray)
-                    Text("No products match '\(searchText)'")
-                        .font(.headline)
-                        .foregroundColor(.secondary)
-                }
-            } else {
-                List {
-                    ForEach(filteredProducts) { product in
-                        VStack(alignment: .leading) {
-                            Text(product.productName ?? "Unknown Product")
-                                .font(.headline)
-                            Text(product.productDescription ?? "No description available")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                                .lineLimit(1)
-                        }
+        List {
+            ForEach(filteredProducts) { product in
+                // NavigationLink allows tapping a product to see details
+                NavigationLink(destination: ProductDetailView(product: product)) {
+                    VStack(alignment: .leading) {
+                        Text(product.productName ?? "Unknown Product")
+                            .font(.headline)
+                        Text(product.productDescription ?? "No description")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .lineLimit(1)
                     }
-                    .onDelete(perform: deleteProducts)
                 }
             }
+            .onDelete(perform: deleteProducts)
         }
         .navigationTitle("All Products")
         .searchable(text: $searchText, prompt: "Search name or description")
@@ -59,12 +49,29 @@ struct ProductListView: View {
     private func deleteProducts(offsets: IndexSet) {
         withAnimation {
             offsets.map { filteredProducts[$0] }.forEach(viewContext.delete)
-            
             do {
                 try viewContext.save()
             } catch {
-                print("Error deleting: \(error)")
+                print("Delete error: \(error)")
             }
         }
+    }
+}
+
+struct ProductDetailView: View {
+    let product: Product
+    var body: some View {
+        List {
+            Section(header: Text("Product Info")) {
+                Text("Name: \(product.productName ?? "")")
+                Text("ID: \(product.productId)")
+                Text("Price: $\(String(format: "%.2f", product.productPrice))")
+                Text("Provider: \(product.productProvider ?? "")")
+            }
+            Section(header: Text("Description")) {
+                Text(product.productDescription ?? "")
+            }
+        }
+        .navigationTitle("Details")
     }
 }
