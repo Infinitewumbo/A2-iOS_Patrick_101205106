@@ -14,6 +14,7 @@ struct ContentView: View {
     private var products: FetchedResults<Product>
     
     @State private var currentIndex: Int = 0
+    @State private var showingAddSheet = false // State for the modal
 
     var body: some View {
         NavigationView {
@@ -61,11 +62,20 @@ struct ContentView: View {
             }
             .navigationTitle("Product Details")
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: { showingAddSheet = true }) {
+                        Image(systemName: "plus") // Button to add new product
+                    }
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink(destination: ProductListView()) {
                         Image(systemName: "list.bullet")
                     }
                 }
+            }
+            // Logic to show the AddProductView
+            .sheet(isPresented: $showingAddSheet) {
+                AddProductView()
             }
         }
     }
