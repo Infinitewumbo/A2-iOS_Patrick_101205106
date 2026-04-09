@@ -14,66 +14,86 @@ struct ContentView: View {
     private var products: FetchedResults<Product>
     
     @State private var currentIndex: Int = 0
-    @State private var showingAddSheet = false // State for the modal
+    @State private var showingAddSheet = false
 
     var body: some View {
         NavigationView {
-            VStack(spacing: 20) {
+            VStack(spacing: 25) {
                 if !products.isEmpty {
                     let currentProduct = products[currentIndex]
                     
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("Product ID: \(currentProduct.productId)")
-                            .font(.headline)
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack {
+                            Text("ID: \(currentProduct.productId)")
+                                .font(.caption.bold())
+                                .padding(6)
+                                .background(Color.blue.opacity(0.2))
+                                .cornerRadius(5)
+                            Spacer()
+                            Text(currentProduct.productProvider ?? "Unknown")
+                                .font(.caption)
+                                .italic()
+                        }
+                        
                         Text(currentProduct.productName ?? "No Name")
-                            .font(.title).bold()
+                            .font(.title2.bold())
+                            .foregroundColor(.primary)
+                        
+                        Divider()
+                        
                         Text(currentProduct.productDescription ?? "No Description")
                             .font(.body)
-                        Text("Price: $\(String(format: "%.2f", currentProduct.productPrice))")
-                            .foregroundColor(.green)
-                        Text("Provider: \(currentProduct.productProvider ?? "Unknown")")
-                            .font(.subheadline).italic()
+                            .foregroundColor(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                        
+                        Text("$\(String(format: "%.2f", currentProduct.productPrice))")
+                            .font(.title3.bold())
+                            .foregroundColor(.blue)
                     }
                     .padding()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color.gray.opacity(0.1))
-                    .cornerRadius(10)
+                    .background(RoundedRectangle(cornerRadius: 15)
+                        .fill(Color(UIColor.systemBackground))
+                        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 5))
+                    .padding(.horizontal)
                     
+                    // Navigation Controls
                     HStack {
                         Button(action: { if currentIndex > 0 { currentIndex -= 1 } }) {
-                            Label("Previous", systemImage: "arrow.left")
+                            Image(systemName: "chevron.left.circle.fill")
+                                .font(.largeTitle)
                         }
                         .disabled(currentIndex == 0)
                         
                         Spacer()
                         Text("\(currentIndex + 1) of \(products.count)")
+                            .font(.headline)
                         Spacer()
                         
                         Button(action: { if currentIndex < products.count - 1 { currentIndex += 1 } }) {
-                            Label("Next", systemImage: "arrow.right")
+                            Image(systemName: "chevron.right.circle.fill")
+                                .font(.largeTitle)
                         }
                         .disabled(currentIndex == products.count - 1)
                     }
-                    .padding()
+                    .padding(.horizontal, 40)
                     
                 } else {
-                    Text("No products found.")
+                    ContentUnavailableView("No Products", systemImage: "box.truck", description: Text("Tap + to add your first product."))
                 }
             }
             .navigationTitle("Product Details")
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: { showingAddSheet = true }) {
-                        Image(systemName: "plus") // Button to add new product
+                        Image(systemName: "plus.circle.fill")
                     }
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink(destination: ProductListView()) {
-                        Image(systemName: "list.bullet")
+                        Image(systemName: "list.dash")
                     }
                 }
             }
-            // Logic to show the AddProductView
             .sheet(isPresented: $showingAddSheet) {
                 AddProductView()
             }
