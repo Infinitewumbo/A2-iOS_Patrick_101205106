@@ -10,77 +10,64 @@ import CoreData
 
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
-
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)],
-        animation: .default)
-    private var items: FetchedResults<Item>
+    
+    // Fetch all products sorted by ID
+    @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \Product.productId, ascending: true)])
+    private var products: FetchedResults<Product>
+    
+    // Track which product is currently being viewed
+    @State private var currentIndex: Int = 0
 
     var body: some View {
         NavigationView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp!, formatter: itemFormatter)")
-                    } label: {
-                        Text(item.timestamp!, formatter: itemFormatter)
+            VStack(spacing: 20) {
+                if !products.isEmpty {
+                    let currentProduct = products[currentIndex]
+                    
+                    // Product Details Card
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Product ID: \(currentProduct.productId)")
+                            .font(.headline)
+                        Text(currentProduct.productName ?? "No Name")
+                            .font(.title).bold()
+                        Text(currentProduct.productDescription ?? "No Description")
+                            .font(.body)
+                        Text("Price: $\(String(format: "%.2f", currentProduct.productPrice))")
+                            .foregroundColor(.green)
+                        Text("Provider: \(currentProduct.productProvider ?? "Unknown")")
+                            .font(.subheadline).italic()
                     }
-                }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
+                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.gray.opacity(0.1))
+                    .cornerRadius(10)
+                    
+                    // Navigation Buttons (Requirement: "allow user to navigate through all products")
+                    HStack {
+                        Button(action: { if currentIndex > 0 { currentIndex -= 1 } }) {
+                            Label("Previous", systemImage: "arrow.left")
+                        }
+                        .disabled(currentIndex == 0)
+                        
+                        Spacer()
+                        
+                        Text("\(currentIndex + 1) of \(products.count)")
+                        
+                        Spacer()
+                        
+                        Button(action: { if currentIndex < products.count - 1 { currentIndex += 1 } }) {
+                            Label("Next", systemImage: "arrow.right")
+                        }
+                        .disabled(currentIndex == products.count - 1)
                     }
+                    .padding()
+                    
+                } else {
+                    Text("No products found.")
                 }
             }
-            Text("Select an item")
+            .navigationTitle("Product Details")
+            .padding()
         }
     }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            offsets.map { items[$0] }.forEach(viewContext.delete)
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
-        }
-    }
-}
-
-private let itemFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.dateStyle = .short
-    formatter.timeStyle = .medium
-    return formatter
-}()
-
-#Preview {
-    ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
 }
