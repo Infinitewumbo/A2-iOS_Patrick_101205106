@@ -16,6 +16,9 @@ struct A2_iOS_Patrick_101205106App: App {
         WindowGroup {
             ContentView()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
+                .onAppear {
+                    DataSeeder.seedProducts(context: persistenceController.container.viewContext)
+                }
         }
     }
 }
