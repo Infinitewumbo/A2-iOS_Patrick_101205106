@@ -12,11 +12,11 @@ struct AddProductView: View {
     @Environment(\.dismiss) var dismiss
 
     // State variables for each required attribute
+    @State private var id = ""
     @State private var name = ""
     @State private var description = ""
     @State private var price = ""
     @State private var provider = ""
-    @State private var id = ""
 
     var body: some View {
         NavigationView {
@@ -36,7 +36,29 @@ struct AddProductView: View {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") { dismiss() }
                 }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Save") {
+                        saveProduct()
+                    }
+                    .disabled(name.isEmpty || id.isEmpty)
+                }
             }
+        }
+    }
+
+    private func saveProduct() {
+        let newProduct = Product(context: viewContext)
+        newProduct.productId = Int64(id) ?? 0
+        newProduct.productName = name
+        newProduct.productDescription = description
+        newProduct.productPrice = Double(price) ?? 0.0
+        newProduct.productProvider = provider
+
+        do {
+            try viewContext.save() // Save to Core Data
+            dismiss()
+        } catch {
+            print("Error saving product: \(error)")
         }
     }
 }
